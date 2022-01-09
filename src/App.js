@@ -3,6 +3,8 @@ import initialState from './data.js';
 import DatePicker from "react-datepicker";
 import moment from 'moment'
 
+import SweetAlert from 'sweetalert2-react';
+
 import "react-datepicker/dist/react-datepicker.css";
 
 function App() {
@@ -14,6 +16,8 @@ function App() {
   const [error, setError] = useState(false);
   const [date, setDate] = useState('');
   const [sum, setSum] = useState(0);
+  const [show, setShow] = useState(false);
+
   // handle top search box  input
   const handleSearch  = event => {
     const value = event.target.value;
@@ -126,6 +130,7 @@ function App() {
     }) 
     setDatas(obj);
     setSearchDatas(obj);
+    setShow(true)
   }
   // Statistics all record 
   const sumOfBudget = () => {
@@ -199,6 +204,11 @@ function App() {
   return ( 
     <div className="container mx-auto py-5 px-5"> 
       <div className="w-6/12 mx-auto">
+        <SweetAlert
+          show={show}
+          title="Data Updated Successfully"  
+          onConfirm={() => setShow(false)}
+        />
         <section className="filter--area bg-cyan-600 py-4 px-3 rounded-md">
           <div className="flex items-center gap-10">
             <h2 className="text-lg text-white flex-shrink-0">Search By: </h2>  
