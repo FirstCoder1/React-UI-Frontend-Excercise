@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react"; 
+import { useState, useEffect, useRef } from "react"; 
 import initialState from './data.js';
+import './App.css';
 import DatePicker from "react-datepicker";
 import moment from 'moment'
 
 import SweetAlert from 'sweetalert2-react';
-
+import DateRangePicker from '@wojtekmaj/react-daterange-picker';
 import "react-datepicker/dist/react-datepicker.css";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
   const [sum, setSum] = useState(0);
   const [show, setShow] = useState(false);
 
+  const searchInput = useRef();
   // handle top search box  input
   const handleSearch  = event => {
     const value = event.target.value;
@@ -35,9 +37,18 @@ function App() {
       x.project_owner.toLowerCase().includes(keyword) ||
       x.budget.toString().includes(keyword)
     )     
-    if (date) {
-      let newDate = moment(date).format("MM/DD/YYYY"); 
-      filtered = filtered.filter(x => x.created.includes(newDate));    
+    if (date) { 
+      const start = moment(date[0]).subtract(1, 'days');
+      filtered = filtered.filter(x => {
+        const actual = moment(x.created).subtract(1, 'hours'); 
+        let created = moment(actual).isBetween(start, date[1]);
+        if (created) {
+          return created
+        } else {
+          const actual = moment(x.modified).subtract(1, 'hours'); 
+          return moment(actual).isBetween(start, date[1]);
+        }
+      });   
     }
 
     if (filtered.length > 0) {
@@ -83,6 +94,7 @@ function App() {
     });  
     setDatas(obj);
     setSearchDatas(obj);
+    searchInput.current.focus()
   }, []);
 
 
@@ -212,9 +224,13 @@ function App() {
         <section className="filter--area bg-cyan-600 py-4 px-3 rounded-md">
           <div className="flex items-center gap-10">
             <h2 className="text-lg text-white flex-shrink-0">Search By: </h2>  
-            <input type="text" placeholder="Search" onChange={handleSearch} className="py-2 px-5 border border-gray-200 rounded-md" />
+            <input ref={searchInput} type="text" placeholder="Search" onChange={handleSearch} className="py-2 px-5 border border-gray-200 rounded-md" />
             <span className="text-white">Or</span>
-            <DatePicker placeholderText="Date" format="MM/dd/YY" selected={date} className="py-2 px-5 border border-gray-200 rounded-md" onChange={(date) => setDate(date)} /> 
+              <DateRangePicker
+                onChange={(date) => setDate(date)}
+                value={date}
+                className="p-2 bg-white border border-gray-200 rounded-md"
+              /> 
           </div>
         </section>
         <section className="pt-5 px-5 flex items-center justify-between">
